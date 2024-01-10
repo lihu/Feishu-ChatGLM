@@ -7,14 +7,14 @@ import os
 from torch.nn import Module
 
 DEVICE = "cuda"
-DEVICE_IDS = ["0", "1"]
+DEVICE_IDS = ["0"]
 CUDA_DEVICES = [f"{DEVICE}:{device_id}" for device_id in DEVICE_IDS] if DEVICE_IDS else [DEVICE]
 
 DEFAULT_MAX_LENGTH = 2048
 DEFAULT_TOP_P = 0.7
 DEFAULT_TEMPERATURE = 0.95
 
-CHATGLM_MODEL = 'THUDM/chatglm-6b-int4'
+CHATGLM_MODEL = '/opt/chatglm2-6b'
 
 
 app = FastAPI()
@@ -53,7 +53,7 @@ def auto_configure_device_map(num_gpus: int) -> Dict[str, int]:
 def load_model_on_gpus(checkpoint_path: Union[str, os.PathLike], num_gpus: int = 2,
                        device_map: Optional[Dict[str, int]] = None, **kwargs) -> Module:
     if num_gpus < 2 and device_map is None:
-        model = AutoModel.from_pretrained(checkpoint_path, trust_remote_code=True, **kwargs).half().cuda()
+        model = AutoModel.from_pretrained(checkpoint_path, trust_remote_code=True, **kwargs).quantize(8).cuda()
     else:
         from accelerate import dispatch_model
 
@@ -113,6 +113,6 @@ async def create_item(request: Request):
 
 if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(CHATGLM_MODEL, trust_remote_code=True)
-    model = load_model_on_gpus(CHATGLM_MODEL, num_gpus=2)
+    model = load_model_on_gpus(CHATGLM_MODEL, num_gpus=1)
     model.eval()
     uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)

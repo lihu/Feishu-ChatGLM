@@ -19,6 +19,7 @@ class ChatEvent:
     content: str
     create_time: int
     sender_user_id: str
+    parent_id: str
 
 def init_db_if_required():
     if not os.path.exists('data'):
@@ -29,7 +30,7 @@ def init_db_if_required():
     c = conn.cursor()
     # Create table
     c.execute('''CREATE TABLE IF NOT EXISTS chat_event
-                 (user_id text, chat_id text, chat_type text, message_id text, message_type text, content text, create_time integer,sender_user_id text)''')
+                 (user_id text, chat_id text, chat_type text, message_id text, message_type text, content text, create_time integer,sender_user_id text, parent_id text)''')
     conn.commit()
     conn.close()
 
@@ -52,7 +53,7 @@ def clean_chat(user_id:str):
 def append_chat_event(chat_event: ChatEvent):
     conn = sqlite3.connect(CHAT_HISTORY_DB_FILE)
     c = conn.cursor()
-    c.execute("INSERT INTO chat_event VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (chat_event.user_id, chat_event.chat_id, chat_event.chat_type, chat_event.message_id, chat_event.message_type, chat_event.content, chat_event.create_time, chat_event.sender_user_id))
+    c.execute("INSERT INTO chat_event VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (chat_event.user_id, chat_event.chat_id, chat_event.chat_type, chat_event.message_id, chat_event.message_type, chat_event.content, chat_event.create_time, chat_event.sender_user_id, chat_event.parent_id))
     conn.commit()
     conn.close()
 

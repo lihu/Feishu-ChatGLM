@@ -65,7 +65,8 @@ def route_im_message(ctx: Context, conf: Config, event: MessageReceiveEvent) -> 
             "message_type": event.event.message.message_type,
             "content": event.event.message.content,
             "create_time": event.event.message.create_time,
-            "sender_user_id": event.event.sender.sender_id.user_id
+            "sender_user_id": event.event.sender.sender_id.user_id,
+            "parent_id": event.event.message.parent_id,
         })
         append_chat_event(chat_event)
         mark_event_processed(event)

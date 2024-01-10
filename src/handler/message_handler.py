@@ -8,6 +8,7 @@ from store.chat_history import ChatEvent, get_chat_context_by_user_id
 from store.user_prompt import user_prompt
 from util.app_config import AppConfig, app_config
 from util.logger import app_logger
+import pdb
 
 if app_config.LLM == 'chatGLM':
     from llm.chatglm import get_chat_response
@@ -69,12 +70,14 @@ class ChatglmMessageEventHandler:
         # check if the message is already handled
         if "text" in content:
             # get history
+            #pdb.set_trace()
             db_history = get_chat_context_by_user_id(chat_event.user_id)
             prompt = user_prompt.read_prompt(chat_event.user_id)
             extra_args = {"prompt": prompt} if prompt else {}
             if len(db_history) == 0:
                 return self.message_sender.send_text_message(
-                    chat_event.sender_user_id, get_chat_response(content["text"]))
+                    chat_event.sender_user_id, get_chat_response(content["text"]), chat_id=chat_event.chat_id, 
+                        parent_id=chat_event.parent_id, msg_id=chat_event.message_id)
             else:
                 
                 # 这里注意，消息会先落库，再调聊天模型，所以要把当前的提问先分离出来
@@ -86,5 +89,6 @@ class ChatglmMessageEventHandler:
 
                 response = get_chat_response(current_question, history=gpt_history)
                 return self.message_sender.send_text_message(
-                    chat_event.sender_user_id, response)
+                    chat_event.sender_user_id, response, chat_id=chat_event.chat_id, parent_id=chat_event.parent_id,
+                    msg_id=chat_event.message_id)
         return True

@@ -7,6 +7,7 @@ from util.app_config import app_config
 from store.chat_history import ChatEvent, append_chat_event
 from util.logger import app_logger
 from feishu.command_card import COMMAND_CARD
+import pdb
 
 @attr.s
 class Message(object):
@@ -19,15 +20,15 @@ class MessageSender:
             raise Exception("conf is required")
         self.conf = conf
 
-    def send_text_message(self, user_id, msg, append=True):
+    def send_text_message(self, user_id, msg, append=True, _id=None, chat_id=None, parent_id=None, msg_id=None):
+        #pdb.set_trace()
         body = {
-            "user_id": user_id,
+            #"user_id": user_id,
+            #"chat_id": chat_id,
             "msg_type": "text",
-            "content": {
-                "text": msg
-            }
+            "content": json.dumps({"text": msg}),
         }
-        req = Request('/open-apis/message/v4/send', 'POST', ACCESS_TOKEN_TYPE_TENANT, body,
+        req = Request(f"/open-apis/im/v1/messages/{msg_id}/reply", 'POST', ACCESS_TOKEN_TYPE_TENANT, body,
                       output_class=Message, request_opts=[set_timeout(3)])
         resp = req.do(self.conf)
         app_logger.debug("send_text_message:%s", msg)
@@ -36,13 +37,14 @@ class MessageSender:
             if append:
                 new_chat_event = ChatEvent(**{
                     "user_id": user_id,
-                    "chat_id": "",
+                    "chat_id": chat_id,
                     "chat_type": "",
                     "message_id": resp.data.message_id,
-                    "message_type": "",
+                    "message_type": "text",
                     "content": json.dumps({"text": msg}),
                     "sender_user_id": "assistant",
-                    "create_time": int(time.time() * 1000)
+                    "create_time": int(time.time() * 1000),
+                    "parent_id": parent_id,
                 })
                 append_chat_event(new_chat_event)
             return True
