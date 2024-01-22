@@ -26,7 +26,7 @@ class MessageSender:
             #"user_id": user_id,
             #"chat_id": chat_id,
             "msg_type": "text",
-            "content": json.dumps({"text": msg}),
+            "content": json.dumps({"text": msg}) if msg_id else "",
         }
         req = Request(f"/open-apis/im/v1/messages/{msg_id}/reply", 'POST', ACCESS_TOKEN_TYPE_TENANT, body,
                       output_class=Message, request_opts=[set_timeout(3)])

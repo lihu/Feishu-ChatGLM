@@ -5,6 +5,7 @@ import torch
 from typing import Dict, Tuple, Union, Optional
 import os
 from torch.nn import Module
+import pdb
 
 DEVICE = "cuda"
 DEVICE_IDS = ["0"]
@@ -14,7 +15,7 @@ DEFAULT_MAX_LENGTH = 2048
 DEFAULT_TOP_P = 0.7
 DEFAULT_TEMPERATURE = 0.95
 
-CHATGLM_MODEL = '/opt/chatglm2-6b'
+CHATGLM_MODEL = '/opt/chatglm3-6b'
 
 
 app = FastAPI()
@@ -86,7 +87,8 @@ async def create_item(request: Request):
     json_post = json.dumps(json_post_raw)
     json_post_list = json.loads(json_post)
     prompt = json_post_list.get('prompt')
-    history = json_post_list.get('history')
+    #pdb.set_trace()
+    history = list(json_post_list.get('history'))
     max_length = json_post_list.get('max_length')
     top_p = json_post_list.get('top_p')
     temperature = json_post_list.get('temperature')

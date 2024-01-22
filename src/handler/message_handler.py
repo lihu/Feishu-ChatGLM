@@ -18,6 +18,7 @@ else:
 
 def get_text_message(chat_event: ChatEvent):
     try:
+        #pdb.set_trace()
         content = json.loads(chat_event.content)
         if "text" in content:
             return content["text"]
@@ -85,7 +86,10 @@ class ChatglmMessageEventHandler:
                 current_question = user_history[-1]
                 user_history = user_history[:-1]
                 ai_history = [get_text_message(x) for x in db_history if x.sender_user_id == "assistant"]
-                gpt_history = list(zip(user_history, ai_history))
+                gpt_history = []
+                for x, y in zip(user_history, ai_history):
+                    gpt_history.append({'role': 'user', 'content': x})
+                    gpt_history.append({'role': 'assistant', 'content': y})
 
                 response = get_chat_response(current_question, history=gpt_history)
                 return self.message_sender.send_text_message(

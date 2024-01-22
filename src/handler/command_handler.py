@@ -5,6 +5,7 @@ from feishu.message_sender import MessageSender
 from store.chat_history import clean_chat
 from util.logger import app_logger
 from store.user_prompt import user_prompt
+import pdb
 
 class CommandHandler:
     def __init__(self, app_config: AppConfig, conf: Config):
@@ -44,7 +45,8 @@ class CommandHandler:
             if command == "/new":
                 app_logger.info("new chat")
                 clean_chat(event.event.sender.sender_id.user_id)
-                self.message_sender.send_text_message(event.event.sender.sender_id.user_id,"New chat started", append=False)
+                #pdb.set_trace()
+                self.message_sender.send_text_message(event.event.sender.sender_id.user_id,"New chat started", append=False, msg_id=event.event.message.message_id)
             elif command.startswith("/prompt "):
                 # /prompt <prompt>
                 prompt = command[8:]            
@@ -53,7 +55,7 @@ class CommandHandler:
                 else:
                     user_prompt.write_prompt(event.event.sender.sender_id.user_id, prompt)
                 clean_chat(event.event.sender.sender_id.user_id)
-                self.message_sender.send_text_message(event.event.sender.sender_id.user_id,"Prompt is set", append=False)
+                self.message_sender.send_text_message(event.event.sender.sender_id.user_id,"Prompt is set", append=False, msg_id=event.event.message.message_id)
             else:
                 app_logger.info("unknown command")
                 # self.message_sender.send_text_message(event.event.sender.sender_id.user_id, "Unknown command", append=False)
